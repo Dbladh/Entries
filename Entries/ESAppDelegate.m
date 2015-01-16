@@ -7,6 +7,7 @@
 //
 
 #import "ESAppDelegate.h"
+#import "Entry.h"
 
 @implementation ESAppDelegate
 
@@ -14,11 +15,48 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
+   
+    NSArray * entriesFromDefaults = [self retrieveEntriesFromDefaults];
+    NSMutableArray * mutableEntreiesFromDefaults = [NSMutableArray arrayWithArray:entriesFromDefaults];
+    
+    NSMutableDictionary * entryDictionary = [NSMutableDictionary dictionary];
+    [entryDictionary setValue:@"Our First Entry" forKey:@"title"];
+    [entryDictionary setValue:@"This Would Be The Text" forKey:@"text"];
+    [entryDictionary setValue:[NSDate date] forKey:@"timeStamp"];
+    
+    Entry * entry = [[Entry alloc] initWithDictionary:entryDictionary];
+    
+    [mutableEntreiesFromDefaults addObject:entry];
+    
+    [self storeEntriesToDefaults:mutableEntreiesFromDefaults];
+    
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     return YES;
 }
 
+- (NSArray *)retrieveEntriesFromDefaults {
+    NSArray * entryDictionaries = [[NSUserDefaults standardUserDefaults] objectForKey:@"entries"];
+    
+    NSMutableArray * mutableEntries = [NSMutableArray array];
+    for (NSDictionary * entryDictionary in entryDictionaries) {
+        Entry *entry = [[Entry alloc] initWithDictionary:entryDictionary];
+        [mutableEntries addObject:entry];
+    }
+    return mutableEntries;
+}
+
+-(void)storeEntriesToDefaults: (NSArray *)entries {
+    NSMutableArray *mutableEntryDictionaries = [NSMutableArray array];
+    
+    for (Entry *entry in entries) {
+        NSDictionary *entryDictionary = [entry entryDictionary];
+        [mutableEntryDictionaries addObject:entryDictionary];
+        
+    }
+    [[NSUserDefaults standardUserDefaults] setObject:mutableEntryDictionaries forKey:@"entries"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
 - (void)applicationWillResignActive:(UIApplication *)application
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
